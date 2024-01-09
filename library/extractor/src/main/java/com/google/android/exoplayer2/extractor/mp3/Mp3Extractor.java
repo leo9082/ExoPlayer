@@ -15,25 +15,11 @@
  */
 package com.google.android.exoplayer2.extractor.mp3;
 
-import static java.lang.annotation.ElementType.TYPE_USE;
-
 import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.Format;
-import com.google.android.exoplayer2.ParserException;
-import com.google.android.exoplayer2.PlaybackException;
-import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.*;
 import com.google.android.exoplayer2.audio.MpegAudioUtil;
-import com.google.android.exoplayer2.extractor.DummyTrackOutput;
-import com.google.android.exoplayer2.extractor.Extractor;
-import com.google.android.exoplayer2.extractor.ExtractorInput;
-import com.google.android.exoplayer2.extractor.ExtractorOutput;
-import com.google.android.exoplayer2.extractor.ExtractorsFactory;
-import com.google.android.exoplayer2.extractor.GaplessInfoHolder;
-import com.google.android.exoplayer2.extractor.Id3Peeker;
-import com.google.android.exoplayer2.extractor.PositionHolder;
-import com.google.android.exoplayer2.extractor.TrackOutput;
+import com.google.android.exoplayer2.extractor.*;
 import com.google.android.exoplayer2.extractor.mp3.Seeker.UnseekableSeeker;
 import com.google.android.exoplayer2.metadata.Metadata;
 import com.google.android.exoplayer2.metadata.id3.Id3Decoder;
@@ -43,15 +29,18 @@ import com.google.android.exoplayer2.metadata.id3.TextInformationFrame;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.ParsableByteArray;
 import com.google.android.exoplayer2.util.Util;
+import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.RequiresNonNull;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.RequiresNonNull;
+
+import static java.lang.annotation.ElementType.TYPE_USE;
 
 /**
  * Extracts data from the MP3 container format.
@@ -510,7 +499,9 @@ public final class Mp3Extractor implements Extractor {
     int seekHeader = getSeekFrameHeader(frame, xingBase);
     @Nullable Seeker seeker;
     if (seekHeader == SEEK_HEADER_XING || seekHeader == SEEK_HEADER_INFO) {
+      Seeker corrector = new ExactSeeker(input);
       seeker = XingSeeker.create(input.getLength(), input.getPosition(), synchronizedHeader, frame);
+      ((XingSeeker) seeker).setCorrector(corrector);
       if (seeker != null && !gaplessInfoHolder.hasGaplessInfo()) {
         // If there is a Xing header, read gapless playback metadata at a fixed offset.
         input.resetPeekPosition();

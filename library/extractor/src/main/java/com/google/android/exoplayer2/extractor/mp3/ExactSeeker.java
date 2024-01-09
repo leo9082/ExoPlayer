@@ -2,6 +2,7 @@ package com.google.android.exoplayer2.extractor.mp3;
 
 import com.google.android.exoplayer2.extractor.ExtractorInput;
 import com.google.android.exoplayer2.extractor.SeekPoint;
+
 import java.io.IOException;
 
 public class ExactSeeker implements Seeker {
@@ -30,6 +31,13 @@ public class ExactSeeker implements Seeker {
         }
       }
     });
+
+    input.resetPeekPosition();
+    try {
+      input.advancePeekPosition((int) startPosition);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   @Override

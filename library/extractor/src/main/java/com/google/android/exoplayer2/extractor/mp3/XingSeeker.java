@@ -102,6 +102,8 @@ import com.google.android.exoplayer2.util.Util;
    */
   @Nullable private final long[] tableOfContents;
 
+  private Seeker corrector;
+
   private XingSeeker(long dataStartPosition, int xingFrameSize, long durationUs) {
     this(
         dataStartPosition,
@@ -132,6 +134,9 @@ import com.google.android.exoplayer2.util.Util;
 
   @Override
   public SeekPoints getSeekPoints(long timeUs) {
+    if (corrector != null) {
+      return corrector.getSeekPoints(timeUs);
+    }
     if (!isSeekable()) {
       return new SeekPoints(new SeekPoint(0, dataStartPosition + xingFrameSize));
     }
@@ -197,5 +202,9 @@ import com.google.android.exoplayer2.util.Util;
    */
   private long getTimeUsForTableIndex(int tableIndex) {
     return (durationUs * tableIndex) / 100;
+  }
+
+  public void setCorrector(Seeker corrector) {
+    this.corrector = corrector;
   }
 }
