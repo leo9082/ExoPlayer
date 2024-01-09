@@ -60,16 +60,17 @@ public class Mp3Parser {
             return;
         }
         while (true) {
-            timeToPosition.put(currentTimeUs, currentHeaderPosition);
+            timeToPosition.put(currentTimeUs, currentHeaderPosition - header.length);
             timeList.add(currentTimeUs);
-            int skip = parseHeader(header) - 4;
+            int skip = parseHeader(header) - header.length;
             if (!inputStream.skip(skip)) {
                 break;
             }
-            currentHeaderPosition += skip + 4;
+            currentHeaderPosition += skip;
             if (inputStream.read(header) == -1) {
                 break;
             }
+            currentHeaderPosition += header.length;
         }
         durationUs = currentTimeUs;
         endOfPosition = currentHeaderPosition;
