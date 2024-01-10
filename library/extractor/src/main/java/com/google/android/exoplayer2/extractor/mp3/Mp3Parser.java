@@ -144,7 +144,30 @@ public class Mp3Parser {
         long targetPosition = Math.min(position, endOfPosition);
         int targetIndex = (int) (targetPosition * timeList.size() / endOfPosition);
         targetIndex = Math.max(targetIndex - 1, 0);
-        return timeList.get(targetIndex);
+        long tempTime;
+        long tempPosition;
+        long leftPosition = 0;
+        long leftTime = 0;
+        long rightPosition = 0;
+        long rightTime = 0;
+        for (int i = targetIndex; i < timeList.size() - 1; i++) {
+            tempTime = timeList.get(i);
+            tempPosition = timeToPosition.get(tempTime);
+            if (tempPosition == targetPosition) {
+                return tempTime;
+            }
+            if (tempPosition < targetPosition) {
+                leftPosition = tempPosition;
+                leftTime = tempTime;
+            }
+            rightTime = tempTime;
+            rightPosition = targetPosition;
+        }
+        if (Math.abs(leftPosition - position) < Math.abs(rightPosition - position)) {
+            return leftTime;
+        } else {
+            return rightTime;
+        }
     }
 
     private byte[] findFirstHeader(Input inputStream) {
